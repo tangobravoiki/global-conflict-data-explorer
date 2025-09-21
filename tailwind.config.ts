@@ -57,6 +57,31 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        // UCDP Map Colors
+        map: {
+          land: "hsl(var(--map-land))",
+          water: "hsl(var(--map-water))",
+          conflict: "hsl(var(--map-conflict))",
+          border: "hsl(var(--map-border))",
+        },
+        // Chart Colors
+        chart: {
+          grid: "hsl(var(--chart-grid))",
+          violence: "hsl(var(--chart-line-violence))",
+          nonstate: "hsl(var(--chart-line-nonstate))",
+          onesided: "hsl(var(--chart-line-onesided))",
+        },
+      },
+      backgroundImage: {
+        'gradient-primary': 'var(--gradient-primary)',
+        'gradient-map': 'var(--gradient-map)',
+      },
+      boxShadow: {
+        'elegant': 'var(--shadow-elegant)',
+        'glow': 'var(--shadow-glow)',
+      },
+      transitionTimingFunction: {
+        'smooth': 'var(--transition-smooth)',
       },
       borderRadius: {
         lg: "var(--radius)",
