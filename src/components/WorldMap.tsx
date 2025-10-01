@@ -2,41 +2,42 @@ import { useState, useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-interface Country {
+interface ATCStream {
   id: string;
+  code: string;
   name: string;
-  conflicts: number;
+  url: string;
   position: [number, number];
 }
 
-const mockCountries: Country[] = [
-  { id: 'syria', name: 'Syria', conflicts: 8, position: [34.8021, 38.9968] },
-  { id: 'ukraine', name: 'Ukraine', conflicts: 3, position: [48.3794, 31.1656] },
-  { id: 'myanmar', name: 'Myanmar', conflicts: 5, position: [21.9162, 95.9560] },
-  { id: 'afghanistan', name: 'Afghanistan', conflicts: 6, position: [33.9391, 67.7100] },
-  { id: 'yemen', name: 'Yemen', conflicts: 4, position: [15.5527, 48.5164] },
-  { id: 'somalia', name: 'Somalia', conflicts: 5, position: [5.1521, 46.1996] },
-  { id: 'ethiopia', name: 'Ethiopia', conflicts: 4, position: [9.1450, 40.4897] },
-  { id: 'nigeria', name: 'Nigeria', conflicts: 3, position: [9.0820, 8.6753] },
-  { id: 'palestine', name: 'Palestine', conflicts: 7, position: [31.9522, 35.2332] },
-  { id: 'iraq', name: 'Iraq', conflicts: 5, position: [33.2232, 43.6793] },
+const atcStreams: ATCStream[] = [
+  { id: '1', code: 'LROP', name: 'Bucharest Henri Coandă', url: 'https://s1-fmt2.liveatc.net/lrop2', position: [44.5722, 26.1021] },
+  { id: '2', code: 'LRBV', name: 'Bucharest Aurel Vlaicu', url: 'https://s1-bos.liveatc.net/lrbv2', position: [44.5031, 26.1022] },
+  { id: '3', code: 'LRSB', name: 'Sibiu Airport', url: 'https://s1-bos.liveatc.net/lrsb2', position: [45.7856, 24.0913] },
+  { id: '4', code: 'LBSF', name: 'Sofia Airport', url: 'https://s1-bos.liveatc.net/lbsf1', position: [42.6952, 23.4114] },
+  { id: '5', code: 'LYNI', name: 'Niš Airport', url: 'https://s1-bos.liveatc.net/lyni2', position: [43.3373, 21.8537] },
+  { id: '6', code: 'LLHZ', name: 'Haifa Airport', url: 'https://s1-bos.liveatc.net/llhz2_twr', position: [32.8094, 35.0431] },
+  { id: '7', code: 'LTBA', name: 'Istanbul Airport', url: 'https://s1-fmt2.liveatc.net/ltba_s', position: [41.2753, 28.7519] },
+  { id: '8', code: 'LWSK', name: 'Skopje Airport', url: 'https://s1-fmt2.liveatc.net/lwsk2_2', position: [41.9617, 21.6214] },
+  { id: '9', code: 'OKBK', name: 'Kuwait Airport', url: 'https://s1-bos.liveatc.net/okbk2', position: [29.2267, 47.9689] },
+  { id: '10', code: 'LTFJ', name: 'Istanbul Sabiha Gökçen', url: 'https://s1-fmt2.liveatc.net/ltfj2', position: [40.8986, 29.3092] },
+  { id: '11', code: 'LGAV', name: 'Athens Airport', url: 'https://s1-fmt2.liveatc.net/lgav2', position: [37.9364, 23.9445] },
+  { id: '12', code: 'LBBG', name: 'Burgas Airport', url: 'https://s1-bos.liveatc.net/lbbg2', position: [42.5697, 27.5152] },
+  { id: '13', code: 'USTR', name: 'Astrakhan Airport', url: 'https://s1-bos.liveatc.net/ustr', position: [46.2833, 48.0063] },
+  { id: '14', code: 'UNNT', name: 'Novokuznetsk Airport', url: 'https://s1-fmt2.liveatc.net/unnt', position: [53.8114, 86.8772] },
+  { id: '15', code: 'OPLA', name: 'Lahore Airport', url: 'https://s1-bos.liveatc.net/opla_atis', position: [31.5217, 74.4036] },
+  { id: '16', code: 'OPKC', name: 'Karachi Airport', url: 'https://s1-bos.liveatc.net/opkc', position: [24.9065, 67.1608] },
+  { id: '17', code: 'LBPD', name: 'Plovdiv Airport', url: 'https://s1-bos.liveatc.net/lbsf2_lbpd_twr', position: [42.0678, 24.8508] },
+  { id: '18', code: 'HAAB', name: 'Addis Ababa Airport', url: 'https://s1-bos.liveatc.net/haab2_twr', position: [8.9779, 38.7989] },
 ];
 
-const getConflictColor = (conflicts: number) => {
-  if (conflicts === 0) return '#94a3b8';
-  if (conflicts <= 2) return '#fb923c';
-  if (conflicts <= 5) return '#f97316';
-  return '#dc2626';
-};
-
-const getConflictRadius = (conflicts: number) => {
-  return Math.max(8, conflicts * 2);
-};
 
 export const WorldMap = () => {
   const mapRef = useRef<L.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
-  const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
+  const [selectedStream, setSelectedStream] = useState<string | null>(null);
+  const [isPlaying, setIsPlaying] = useState<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
@@ -58,28 +59,72 @@ export const WorldMap = () => {
       opacity: 0.7,
     }).addTo(map);
 
-    // Add markers for each country
-    mockCountries.forEach((country) => {
-      const marker = L.circleMarker(country.position, {
-        radius: getConflictRadius(country.conflicts),
-        fillColor: getConflictColor(country.conflicts),
-        fillOpacity: 0.7,
-        color: '#fff',
-        weight: 1,
-      });
+    // Add custom plane icon
+    const planeIcon = L.divIcon({
+      className: 'custom-plane-icon',
+      html: `
+        <div style="
+          width: 32px;
+          height: 32px;
+          background: #3b82f6;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 2px solid white;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+          cursor: pointer;
+          transition: all 0.3s;
+        ">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="white">
+            <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
+          </svg>
+        </div>
+      `,
+      iconSize: [32, 32],
+      iconAnchor: [16, 16],
+    });
+
+    // Add markers for each ATC stream
+    atcStreams.forEach((stream) => {
+      const marker = L.marker(stream.position, { icon: planeIcon });
 
       marker.on('click', () => {
-        setSelectedCountry(prev => prev === country.id ? null : country.id);
-        marker.setStyle({
-          color: selectedCountry === country.id ? '#fff' : '#3b82f6',
-          weight: selectedCountry === country.id ? 1 : 3,
-        });
+        setSelectedStream(stream.id);
+        
+        // Play/stop audio
+        if (isPlaying === stream.id) {
+          audioRef.current?.pause();
+          setIsPlaying(null);
+        } else {
+          if (audioRef.current) {
+            audioRef.current.pause();
+          }
+          audioRef.current = new Audio(stream.url);
+          audioRef.current.play();
+          setIsPlaying(stream.id);
+        }
       });
 
       marker.bindPopup(`
-        <div style="font-size: 14px;">
-          <div style="font-weight: 600;">${country.name}</div>
-          <div style="color: #666;">${country.conflicts} active conflicts</div>
+        <div style="font-size: 14px; min-width: 200px;">
+          <div style="font-weight: 600; margin-bottom: 4px;">${stream.code}</div>
+          <div style="color: #666; margin-bottom: 8px;">${stream.name}</div>
+          <button 
+            onclick="window.open('${stream.url}', '_blank')"
+            style="
+              background: #3b82f6;
+              color: white;
+              border: none;
+              padding: 6px 12px;
+              border-radius: 4px;
+              cursor: pointer;
+              width: 100%;
+              font-size: 12px;
+            "
+          >
+            🎧 Listen Live
+          </button>
         </div>
       `);
 
@@ -97,26 +142,24 @@ export const WorldMap = () => {
     <div className="relative w-full h-full rounded-lg overflow-hidden">
       <div ref={mapContainerRef} className="w-full h-full" style={{ background: 'hsl(var(--map-water))' }} />
       
+      {/* Info Panel */}
+      <div className="absolute top-4 right-4 bg-card/90 backdrop-blur-sm border border-border rounded-lg p-3 shadow-elegant z-[1000] max-w-xs">
+        <div className="text-xs font-medium text-foreground mb-2">🎧 Live ATC Streams</div>
+        <div className="text-xs text-muted-foreground">
+          Click on any airport icon to listen to live air traffic control communications
+        </div>
+      </div>
+      
       {/* Legend */}
       <div className="absolute bottom-4 left-4 bg-card/90 backdrop-blur-sm border border-border rounded-lg p-3 shadow-elegant z-[1000]">
-        <div className="text-xs font-medium text-foreground mb-2">Conflict Intensity</div>
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded" style={{ backgroundColor: '#94a3b8' }}></div>
-            <span className="text-xs text-muted-foreground">No conflicts</span>
+        <div className="text-xs font-medium text-foreground mb-2">Airport Locations</div>
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="white">
+              <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
+            </svg>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded" style={{ backgroundColor: '#fb923c' }}></div>
-            <span className="text-xs text-muted-foreground">1-2 conflicts</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded" style={{ backgroundColor: '#f97316' }}></div>
-            <span className="text-xs text-muted-foreground">3-5 conflicts</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded" style={{ backgroundColor: '#dc2626' }}></div>
-            <span className="text-xs text-muted-foreground">6+ conflicts</span>
-          </div>
+          <span className="text-xs text-muted-foreground">Live ATC Available</span>
         </div>
       </div>
     </div>
