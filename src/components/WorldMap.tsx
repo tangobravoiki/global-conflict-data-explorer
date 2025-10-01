@@ -1,13 +1,12 @@
-import { useState } from 'react';
-import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from 'react-leaflet';
+import { useState, useEffect, useRef } from 'react';
+import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import type { LatLngExpression } from 'leaflet';
 
 interface Country {
   id: string;
   name: string;
   conflicts: number;
-  position: LatLngExpression;
+  position: [number, number];
 }
 
 const mockCountries: Country[] = [
@@ -35,51 +34,68 @@ const getConflictRadius = (conflicts: number) => {
 };
 
 export const WorldMap = () => {
+  const mapRef = useRef<L.Map | null>(null);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!mapContainerRef.current || mapRef.current) return;
+
+    // Initialize map
+    const map = L.map(mapContainerRef.current, {
+      center: [20, 0],
+      zoom: 2,
+      minZoom: 2,
+      maxZoom: 6,
+      zoomControl: false,
+    });
+
+    mapRef.current = map;
+
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      opacity: 0.7,
+    }).addTo(map);
+
+    // Add markers for each country
+    mockCountries.forEach((country) => {
+      const marker = L.circleMarker(country.position, {
+        radius: getConflictRadius(country.conflicts),
+        fillColor: getConflictColor(country.conflicts),
+        fillOpacity: 0.7,
+        color: '#fff',
+        weight: 1,
+      });
+
+      marker.on('click', () => {
+        setSelectedCountry(prev => prev === country.id ? null : country.id);
+        marker.setStyle({
+          color: selectedCountry === country.id ? '#fff' : '#3b82f6',
+          weight: selectedCountry === country.id ? 1 : 3,
+        });
+      });
+
+      marker.bindPopup(`
+        <div style="font-size: 14px;">
+          <div style="font-weight: 600;">${country.name}</div>
+          <div style="color: #666;">${country.conflicts} active conflicts</div>
+        </div>
+      `);
+
+      marker.addTo(map);
+    });
+
+    // Cleanup
+    return () => {
+      map.remove();
+      mapRef.current = null;
+    };
+  }, []);
 
   return (
     <div className="relative w-full h-full rounded-lg overflow-hidden">
-      <MapContainer
-        center={[20, 0]}
-        zoom={2}
-        minZoom={2}
-        maxZoom={6}
-        className="w-full h-full"
-        style={{ background: 'hsl(var(--map-water))' }}
-        zoomControl={false}
-      >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          opacity={0.7}
-        />
-        
-        {mockCountries.map((country) => (
-          <CircleMarker
-            key={country.id}
-            center={country.position}
-            radius={getConflictRadius(country.conflicts)}
-            pathOptions={{
-              fillColor: getConflictColor(country.conflicts),
-              fillOpacity: 0.7,
-              color: selectedCountry === country.id ? '#3b82f6' : '#fff',
-              weight: selectedCountry === country.id ? 3 : 1,
-            }}
-            eventHandlers={{
-              click: () => setSelectedCountry(selectedCountry === country.id ? null : country.id),
-            }}
-          >
-            <Popup>
-              <div className="text-sm">
-                <div className="font-semibold">{country.name}</div>
-                <div className="text-muted-foreground">
-                  {country.conflicts} active conflicts
-                </div>
-              </div>
-            </Popup>
-          </CircleMarker>
-        ))}
-      </MapContainer>
+      <div ref={mapContainerRef} className="w-full h-full" style={{ background: 'hsl(var(--map-water))' }} />
       
       {/* Legend */}
       <div className="absolute bottom-4 left-4 bg-card/90 backdrop-blur-sm border border-border rounded-lg p-3 shadow-elegant z-[1000]">
