@@ -7,11 +7,18 @@ interface Country {
   path: string;
 }
 
-const mockCountries: Country[] = [
-  { id: 'syria', name: 'Syria', conflicts: 8, path: 'M600,200 L640,190 L650,220 L620,240 Z' },
-  { id: 'ukraine', name: 'Ukraine', conflicts: 3, path: 'M550,180 L580,170 L590,190 L570,200 Z' },
-  { id: 'myanmar', name: 'Myanmar', conflicts: 5, path: 'M720,280 L740,270 L750,300 L730,310 Z' },
-  { id: 'afghanistan', name: 'Afghanistan', conflicts: 6, path: 'M650,220 L680,210 L690,240 L670,250 Z' },
+interface CountryData extends Country {
+  cx: number;
+  cy: number;
+}
+
+const mockCountries: CountryData[] = [
+  { id: 'syria', name: 'Syria', conflicts: 8, path: 'M600,200 L640,190 L650,220 L620,240 Z', cx: 620, cy: 210 },
+  { id: 'ukraine', name: 'Ukraine', conflicts: 3, path: 'M520,165 L545,160 L555,175 L540,185 Z', cx: 537, cy: 172 },
+  { id: 'myanmar', name: 'Myanmar', conflicts: 5, path: 'M720,250 L740,245 L745,275 L730,285 Z', cx: 735, cy: 265 },
+  { id: 'afghanistan', name: 'Afghanistan', conflicts: 6, path: 'M650,220 L680,210 L690,240 L670,250 Z', cx: 670, cy: 230 },
+  { id: 'yemen', name: 'Yemen', conflicts: 4, path: 'M590,260 L610,255 L615,275 L600,280 Z', cx: 605, cy: 267 },
+  { id: 'somalia', name: 'Somalia', conflicts: 5, path: 'M570,300 L585,295 L595,320 L580,330 Z', cx: 583, cy: 312 },
 ];
 
 export const WorldMap = () => {
@@ -106,19 +113,39 @@ export const WorldMap = () => {
         
         {/* Conflict Markers */}
         {mockCountries.map((country) => (
-          <circle
-            key={`marker-${country.id}`}
-            cx={country.path.match(/M(\d+)/)?.[1] || '0'}
-            cy={country.path.match(/M\d+,(\d+)/)?.[1] || '0'}
-            r={Math.max(3, country.conflicts)}
-            fill="hsl(var(--primary))"
-            stroke="hsl(var(--primary-foreground))"
-            strokeWidth="1"
-            className="animate-pulse cursor-pointer"
-            opacity="0.8"
-            onMouseEnter={() => setHoveredCountry(country.id)}
-            onClick={() => setSelectedCountry(selectedCountry === country.id ? null : country.id)}
-          />
+          <g key={`marker-${country.id}`}>
+            <circle
+              cx={country.cx}
+              cy={country.cy}
+              r={Math.max(4, country.conflicts * 1.2)}
+              fill="hsl(var(--primary))"
+              opacity="0.3"
+              className="cursor-pointer"
+              onMouseEnter={() => setHoveredCountry(country.id)}
+              onClick={() => setSelectedCountry(selectedCountry === country.id ? null : country.id)}
+            >
+              <animate
+                attributeName="r"
+                from={Math.max(4, country.conflicts * 1.2)}
+                to={Math.max(6, country.conflicts * 1.5)}
+                dur="2s"
+                repeatCount="indefinite"
+                values={`${Math.max(4, country.conflicts * 1.2)};${Math.max(6, country.conflicts * 1.5)};${Math.max(4, country.conflicts * 1.2)}`}
+              />
+            </circle>
+            <circle
+              cx={country.cx}
+              cy={country.cy}
+              r={Math.max(3, country.conflicts)}
+              fill="hsl(var(--primary))"
+              stroke="hsl(var(--primary-foreground))"
+              strokeWidth="1"
+              opacity="0.9"
+              className="cursor-pointer"
+              onMouseEnter={() => setHoveredCountry(country.id)}
+              onClick={() => setSelectedCountry(selectedCountry === country.id ? null : country.id)}
+            />
+          </g>
         ))}
       </svg>
       
