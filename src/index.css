@@ -57,9 +57,9 @@
     
     /* Chart Colors */
     --chart-grid: 220 15% 20%;
-    --chart-line-violence: 0 75% 55%;
-    --chart-line-nonstate: 205 95% 55%;
-    --chart-line-onesided: 35 85% 55%;
+    --chart-violence: 0 75% 55%;
+    --chart-nonstate: 205 95% 55%;
+    --chart-onesided: 35 85% 55%;
     
     /* Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(205 95% 55%), hsl(205 95% 45%));
