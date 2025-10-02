@@ -12,11 +12,6 @@ export const SearchHeader = ({ searchQuery, onSearchChange }: SearchHeaderProps)
     <div className="flex items-center justify-between p-4 bg-background border-b border-border">
       {/* Logo and Title */}
       <div className="flex items-center gap-4">
-        <div className="text-2xl font-bold text-foreground">UCDP</div>
-        <div className="hidden md:block">
-          <div className="text-sm text-foreground font-medium">Uppsala Conflict Data Program</div>
-          <div className="text-xs text-muted-foreground">Department of Peace and Conflict Research</div>
-        </div>
       </div>
       
       {/* Search and Controls */}

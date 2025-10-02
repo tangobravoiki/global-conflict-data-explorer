@@ -18,9 +18,6 @@ export const Sidebar = ({ className }: SidebarProps) => {
     <div className={`w-16 bg-sidebar border-r border-sidebar-border flex flex-col ${className}`}>
       {/* Logo/Title */}
       <div className="p-4 border-b border-sidebar-border">
-        <div className="text-xl font-bold text-sidebar-foreground">
-          UCDP
-        </div>
       </div>
       
       {/* Navigation Items */}
