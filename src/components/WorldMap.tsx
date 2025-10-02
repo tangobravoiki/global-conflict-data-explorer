@@ -97,25 +97,25 @@ export const WorldMap = () => {
       className: 'custom-plane-icon',
       html: `
         <div style="
-          width: 32px;
-          height: 32px;
+          width: 8px;
+          height: 8px;
           background: #3b82f6;
           border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
-          border: 2px solid white;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+          border: 1px solid white;
+          box-shadow: 0 1px 4px rgba(0,0,0,0.3);
           cursor: pointer;
           transition: all 0.3s;
         ">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="white">
+          <svg width="5" height="5" viewBox="0 0 24 24" fill="white">
             <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
           </svg>
         </div>
       `,
-      iconSize: [32, 32],
-      iconAnchor: [16, 16],
+      iconSize: [8, 8],
+      iconAnchor: [4, 4],
     });
 
     // Add markers for each ATC stream
