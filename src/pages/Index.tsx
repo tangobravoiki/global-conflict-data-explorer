@@ -38,7 +38,7 @@ const Index = () => {
           {/* Map Area */}
           <div className="flex-1 p-4">
             <div className="h-full rounded-lg overflow-hidden shadow-elegant">
-              <WorldMap />
+              <WorldMap viewMode={viewMode} searchQuery={searchQuery} />
             </div>
           </div>
           

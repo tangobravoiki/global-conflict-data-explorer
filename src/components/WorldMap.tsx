@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { useToast } from '@/hooks/use-toast';
 
 interface ATCStream {
   id: string;
@@ -8,6 +9,11 @@ interface ATCStream {
   name: string;
   url: string;
   position: [number, number];
+}
+
+interface WorldMapProps {
+  viewMode: 'conflict' | 'fatalities';
+  searchQuery: string;
 }
 
 const atcStreams: ATCStream[] = [
@@ -64,13 +70,14 @@ const atcStreams: ATCStream[] = [
   { id: '48', code: 'VABB', name: 'Mumbai Airport', url: 'https://s1-bos.liveatc.net/vabb', position: [19.0896, 72.8656] },
 ];
 
-
-export const WorldMap = () => {
+export const WorldMap = ({ viewMode, searchQuery }: WorldMapProps) => {
   const mapRef = useRef<L.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
+  const markersRef = useRef<L.Marker[]>([]);
   const [selectedStream, setSelectedStream] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
@@ -120,6 +127,34 @@ export const WorldMap = () => {
 
     // Add markers for each ATC stream
     atcStreams.forEach((stream) => {
+      const isConflictMode = viewMode === 'conflict';
+      const iconColor = isConflictMode ? '#3b82f6' : '#ef4444';
+      
+      const planeIcon = L.divIcon({
+        className: 'custom-plane-icon',
+        html: `
+          <div style="
+            width: 8px;
+            height: 8px;
+            background: ${iconColor};
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid white;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: all 0.3s;
+          ">
+            <svg width="5" height="5" viewBox="0 0 24 24" fill="white">
+              <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
+            </svg>
+          </div>
+        `,
+        iconSize: [8, 8],
+        iconAnchor: [4, 4],
+      });
+
       const marker = L.marker(stream.position, { icon: planeIcon });
 
       marker.on('click', () => {
@@ -129,13 +164,28 @@ export const WorldMap = () => {
         if (isPlaying === stream.id) {
           audioRef.current?.pause();
           setIsPlaying(null);
+          toast({
+            title: "Stream Stopped",
+            description: `${stream.name} stream stopped`,
+          });
         } else {
           if (audioRef.current) {
             audioRef.current.pause();
           }
           audioRef.current = new Audio(stream.url);
-          audioRef.current.play();
-          setIsPlaying(stream.id);
+          audioRef.current.play().then(() => {
+            setIsPlaying(stream.id);
+            toast({
+              title: "Now Playing",
+              description: `${stream.code} - ${stream.name}`,
+            });
+          }).catch(() => {
+            toast({
+              title: "Playback Error",
+              description: "Could not play this stream",
+              variant: "destructive",
+            });
+          });
         }
       });
 
@@ -162,14 +212,40 @@ export const WorldMap = () => {
       `);
 
       marker.addTo(map);
+      markersRef.current.push(marker);
     });
 
     // Cleanup
     return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+      markersRef.current = [];
       map.remove();
       mapRef.current = null;
     };
-  }, []);
+  }, [viewMode]);
+
+  // Search functionality
+  useEffect(() => {
+    if (!searchQuery || !mapRef.current) return;
+
+    const query = searchQuery.toLowerCase();
+    const foundStream = atcStreams.find(
+      stream =>
+        stream.code.toLowerCase().includes(query) ||
+        stream.name.toLowerCase().includes(query)
+    );
+
+    if (foundStream) {
+      mapRef.current.setView(foundStream.position, 5);
+      toast({
+        title: "Airport Found",
+        description: `${foundStream.code} - ${foundStream.name}`,
+      });
+    }
+  }, [searchQuery, toast]);
 
   return (
     <div className="relative w-full h-full rounded-lg overflow-hidden">
