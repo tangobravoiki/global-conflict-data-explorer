@@ -174,27 +174,6 @@ export const WorldMap = () => {
   return (
     <div className="relative w-full h-full rounded-lg overflow-hidden">
       <div ref={mapContainerRef} className="w-full h-full" style={{ background: 'hsl(var(--map-water))' }} />
-      
-      {/* Info Panel */}
-      <div className="absolute top-4 right-4 bg-card/90 backdrop-blur-sm border border-border rounded-lg p-3 shadow-elegant z-[1000] max-w-xs">
-        <div className="text-xs font-medium text-foreground mb-2">🎧 Live ATC Streams</div>
-        <div className="text-xs text-muted-foreground">
-          Click on any airport icon to listen to live air traffic control communications
-        </div>
-      </div>
-      
-      {/* Legend */}
-      <div className="absolute bottom-4 left-4 bg-card/90 backdrop-blur-sm border border-border rounded-lg p-3 shadow-elegant z-[1000]">
-        <div className="text-xs font-medium text-foreground mb-2">Airport Locations</div>
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="white">
-              <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
-            </svg>
-          </div>
-          <span className="text-xs text-muted-foreground">Live ATC Available</span>
-        </div>
-      </div>
     </div>
   );
 };
