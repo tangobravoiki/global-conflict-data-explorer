@@ -5,9 +5,11 @@ import { Button } from '@/components/ui/button';
 interface SearchHeaderProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
+  viewMode: 'conflict' | 'fatalities';
+  onViewModeChange: (mode: 'conflict' | 'fatalities') => void;
 }
 
-export const SearchHeader = ({ searchQuery, onSearchChange }: SearchHeaderProps) => {
+export const SearchHeader = ({ searchQuery, onSearchChange, viewMode, onViewModeChange }: SearchHeaderProps) => {
   return (
     <div className="flex items-center justify-between p-4 bg-background border-b border-border">
       {/* Logo and Title */}
@@ -30,7 +32,12 @@ export const SearchHeader = ({ searchQuery, onSearchChange }: SearchHeaderProps)
         <Button 
           variant="default" 
           size="sm"
-          className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-glow"
+          onClick={() => onViewModeChange('conflict')}
+          className={`${
+            viewMode === 'conflict' 
+              ? 'bg-primary hover:bg-primary/90 text-primary-foreground shadow-glow' 
+              : 'bg-primary/50 hover:bg-primary/70 text-primary-foreground'
+          }`}
         >
           COUNTRIES IN CONFLICT VIEW
         </Button>
@@ -38,7 +45,12 @@ export const SearchHeader = ({ searchQuery, onSearchChange }: SearchHeaderProps)
         <Button 
           variant="default" 
           size="sm"
-          className="bg-primary hover:bg-primary/90 text-primary-foreground"
+          onClick={() => onViewModeChange('fatalities')}
+          className={`${
+            viewMode === 'fatalities' 
+              ? 'bg-primary hover:bg-primary/90 text-primary-foreground shadow-glow' 
+              : 'bg-primary/50 hover:bg-primary/70 text-primary-foreground'
+          }`}
         >
           FATALITIES VIEW
         </Button>

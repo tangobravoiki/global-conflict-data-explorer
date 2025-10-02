@@ -7,6 +7,7 @@ import { FilterPanel } from '@/components/FilterPanel';
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [viewMode, setViewMode] = useState<'conflict' | 'fatalities'>('conflict');
   const [filters, setFilters] = useState({
     stateViolence: true,
     nonStateViolence: true,
@@ -28,6 +29,8 @@ const Index = () => {
         <SearchHeader 
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
         />
         
         {/* Main Content Area */}
