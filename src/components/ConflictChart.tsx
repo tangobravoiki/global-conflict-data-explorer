@@ -1,6 +1,18 @@
-import { useEffect, useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Legend } from 'recharts';
-import { fetchConflictTrends } from '@/services/newsApi';
+
+const conflictData = [
+  { year: 1975, stateViolence: 25, nonStateViolence: 15, oneSidedViolence: 8 },
+  { year: 1980, stateViolence: 30, nonStateViolence: 18, oneSidedViolence: 10 },
+  { year: 1985, stateViolence: 28, nonStateViolence: 22, oneSidedViolence: 12 },
+  { year: 1990, stateViolence: 35, nonStateViolence: 25, oneSidedViolence: 15 },
+  { year: 1995, stateViolence: 42, nonStateViolence: 30, oneSidedViolence: 18 },
+  { year: 2000, stateViolence: 38, nonStateViolence: 35, oneSidedViolence: 22 },
+  { year: 2005, stateViolence: 45, nonStateViolence: 40, oneSidedViolence: 25 },
+  { year: 2010, stateViolence: 48, nonStateViolence: 38, oneSidedViolence: 28 },
+  { year: 2015, stateViolence: 52, nonStateViolence: 42, oneSidedViolence: 30 },
+  { year: 2020, stateViolence: 55, nonStateViolence: 45, oneSidedViolence: 32 },
+  { year: 2024, stateViolence: 58, nonStateViolence: 48, oneSidedViolence: 35 },
+];
 
 interface ConflictChartProps {
   filters: {
@@ -11,26 +23,11 @@ interface ConflictChartProps {
 }
 
 export const ConflictChart = ({ filters }: ConflictChartProps) => {
-  const [conflictData, setConflictData] = useState<Array<{
-    year: number;
-    stateViolence: number;
-    nonStateViolence: number;
-    oneSidedViolence: number;
-  }>>([]);
-
-  useEffect(() => {
-    const loadTrends = async () => {
-      const trends = await fetchConflictTrends();
-      setConflictData(trends);
-    };
-    loadTrends();
-  }, []);
-
   return (
     <div className="w-full h-64 bg-card border border-border rounded-lg p-4">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-foreground">Conflict Trends</h3>
-        <div className="text-sm text-muted-foreground">2020-2024</div>
+        <h3 className="text-lg font-semibold text-foreground">Number of Conflicts</h3>
+        <div className="text-sm text-muted-foreground">1975-2024</div>
       </div>
       
       <ResponsiveContainer width="100%" height="100%">
